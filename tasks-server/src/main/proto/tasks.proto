@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.example.proto";
+
+service MyTasksService {
+  rpc enqueueTask(stream TaskCommand) returns (EnqueueResult);
+}
+
+message TaskCommand {
+  int32 task_id = 1;
+  string task_payload = 2;
+}
+
+message TaskInstance {
+  string instance_id = 2;
+}
+
+message ErrorDetails {
+  string message = 1;
+}
+
+message TaskEnqueueResult {
+  int32 task_id = 1;
+  oneof result {
+      TaskInstance instance = 2;
+      ErrorDetails error = 3;
+  }
+}
+
+message EnqueueResult {
+  repeated TaskEnqueueResult results = 1;
+}
