@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
-        var channel = ManagedChannelBuilder.forAddress("localhost", 6200)
+        var channel = ManagedChannelBuilder.forAddress("localhost", 8200)
             .usePlaintext()
             .build();
 
@@ -31,7 +31,7 @@ public class Main {
         worker2.start();
         worker3.start();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 50; j++) {
                 var task = TaskCommand.newBuilder()
                         .setTaskId(i * 10 + j)
