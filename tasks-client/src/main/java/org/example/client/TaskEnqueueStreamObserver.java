@@ -19,6 +19,8 @@ public class TaskEnqueueStreamObserver implements StreamObserver<EnqueueResult> 
 
     @Override
     public void onError(Throwable throwable) {
+        System.out.println("Unexpected error: " + throwable.getCause().toString());
+        latch.countDown();
     }
 
     @Override

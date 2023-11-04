@@ -33,7 +33,9 @@ public class MyJob implements Runnable {
                 }
 
                 var streamLatch = new CountDownLatch(1);
-                var stream = stub.enqueueTask(new TaskEnqueueStreamObserver(streamLatch));
+                var stream = stub
+                        .withDeadlineAfter(10, TimeUnit.SECONDS)
+                        .enqueueTask(new TaskEnqueueStreamObserver(streamLatch));
 
                 int counter = 0;
                 while (task != null) {
