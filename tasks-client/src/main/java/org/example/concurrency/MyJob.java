@@ -39,7 +39,7 @@ public class MyJob implements Runnable {
                 while (task != null) {
                     stream.onNext(task);
 
-                    if (++counter > 10) {
+                    if (++counter >= 10) {
                         break;
                     }
 

@@ -22,7 +22,7 @@ public final class TaskCommandStreamObserver implements StreamObserver<TaskComma
 
     @Override
     public void onNext(TaskCommand taskCommand) {
-        System.out.println("[" + ProcessHandle.current().pid() + "] Running task " + taskCommand.getTaskId());
+        System.out.println("[" + ProcessHandle.current().pid() + "] [" + Thread.currentThread().getId() + "] Running task " + taskCommand.getTaskId());
         Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
         results.add(
             TaskEnqueueResult.newBuilder()
@@ -42,7 +42,7 @@ public final class TaskCommandStreamObserver implements StreamObserver<TaskComma
 
     @Override
     public void onCompleted() {
-        System.out.println("[" + ProcessHandle.current().pid() + "] Completed");
+        System.out.println("[" + ProcessHandle.current().pid() + "] [" + Thread.currentThread().getId() + "] Completed");
         enqueueResultObserver.onNext(
             EnqueueResult.newBuilder()
                 .addAllResults(results)
