@@ -1,11 +1,14 @@
 package org.example;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import io.grpc.ManagedChannelBuilder;
-import org.example.client.TaskEnqueueStreamObserver;
+import org.example.concurrency.MyJob;
 import org.example.proto.MyTasksServiceGrpc;
 import org.example.proto.TaskCommand;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,22 +18,39 @@ public class Main {
 
         MyTasksServiceGrpc.MyTasksServiceStub stub = MyTasksServiceGrpc.newStub(channel);
 
-        CountDownLatch latch = new CountDownLatch(1);
+        var tasks = new ConcurrentLinkedQueue<TaskCommand>();
+        var stopWorkersLatch = new CountDownLatch(1);
 
-        var taskObserver = stub.enqueueTask(new TaskEnqueueStreamObserver(latch));
+        var worker1 = new Thread(new MyJob(tasks, stub, stopWorkersLatch));
+        var worker2 = new Thread(new MyJob(tasks, stub, stopWorkersLatch));
+        var worker3 = new Thread(new MyJob(tasks, stub, stopWorkersLatch));
 
-        for(int i = 1; i <= 10; i++) {
-            var task = TaskCommand.newBuilder()
-                .setTaskId(i)
-                .build();
+        System.out.println("Created workers");
 
-            taskObserver.onNext(task);
+        worker1.start();
+        worker2.start();
+        worker3.start();
+
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 50; j++) {
+                var task = TaskCommand.newBuilder()
+                        .setTaskId(i * 10 + j)
+                        .build();
+
+                tasks.add(task);
+            }
+
+            System.out.println("Added batch of tasks. Sleeping...");
+            Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
         }
 
-        taskObserver.onCompleted();
+        System.out.println("Stopping workers");
+        stopWorkersLatch.countDown();
 
         try {
-            latch.await();
+            worker1.join();
+            worker2.join();
+            worker3.join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
