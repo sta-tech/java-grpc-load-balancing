@@ -42,7 +42,7 @@ public final class TaskCommandStreamObserver implements StreamObserver<TaskComma
 
     @Override
     public void onCompleted() {
-        System.out.println("[" + ProcessHandle.current().pid() + "] [" + Thread.currentThread().getId() + "] Completed");
+        System.out.println("[" + ProcessHandle.current().pid() + "] [" + Thread.currentThread().getId() + "] Stream is completed (" + results.size() + " tasks done)");
         enqueueResultObserver.onNext(
             EnqueueResult.newBuilder()
                 .addAllResults(results)
